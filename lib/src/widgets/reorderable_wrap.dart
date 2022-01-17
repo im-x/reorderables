@@ -37,6 +37,7 @@ class ReorderableWrap extends StatefulWidget {
     required this.children,
     required this.onReorder,
     this.header,
+    this.headerIndex = 0,
     this.footer,
     this.controller,
     this.direction = Axis.horizontal,
@@ -72,6 +73,7 @@ class ReorderableWrap extends StatefulWidget {
   ///
   /// If null, no header will appear before the list.
   final List<Widget>? header;
+  final int headerIndex;
   final Widget? footer;
 
   /// A custom scroll [controller].
@@ -276,6 +278,7 @@ class _ReorderableWrapState extends State<ReorderableWrap> {
       builder: (BuildContext context) {
         return _ReorderableWrapContent(
           header: widget.header,
+          headerIndex: widget.headerIndex,
           footer: widget.footer,
           children: widget.children,
           direction: widget.direction,
@@ -343,6 +346,7 @@ class _ReorderableWrapContent extends StatefulWidget {
     required this.minMainAxisCount,
     required this.maxMainAxisCount,
     this.header,
+    this.headerIndex = 0,
     this.footer,
     this.controller,
     this.reorderAnimationDuration = const Duration(milliseconds: 200),
@@ -350,6 +354,7 @@ class _ReorderableWrapContent extends StatefulWidget {
   });
 
   final List<Widget>? header;
+  final int headerIndex;
   final Widget? footer;
   final ScrollController? controller;
   final List<Widget> children;
@@ -777,6 +782,11 @@ class _ReorderableWrapContentState extends State<_ReorderableWrapContent>
     }
 
     Widget _makeAppearingWidget(Widget child) {
+      bool isReorderable = true;
+      if (toWrap is ReorderableItem) {
+        isReorderable = toWrap.reorderable;
+      }
+
       return makeAppearingWidget(
         child,
         _entranceController,
@@ -786,6 +796,11 @@ class _ReorderableWrapContentState extends State<_ReorderableWrapContent>
     }
 
     Widget _makeDisappearingWidget(Widget child) {
+      bool isReorderable = true;
+      if (toWrap is ReorderableItem) {
+        isReorderable = toWrap.reorderable;
+      }
+
       return makeDisappearingWidget(
         child,
         _ghostController,
@@ -1213,8 +1228,8 @@ class _ReorderableWrapContentState extends State<_ReorderableWrapContent>
       wrappedChildren.insert(
           _currentDisplayIndex, wrappedChildren.removeAt(_dragStartIndex));
     }
-    if (widget.header != null) {
-      wrappedChildren.insertAll(0, widget.header!);
+    if (widget.header != null && (widget.header?.length ?? 0) > 0) {
+      wrappedChildren.insertAll(widget.headerIndex, widget.header!);
     }
     if (widget.footer != null) {
       wrappedChildren.add(widget.footer!);
